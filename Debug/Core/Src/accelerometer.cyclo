@@ -1,0 +1,6 @@
+../Core/Src/accelerometer.c:15:6:Accelerometer_Init	2
+../Core/Src/accelerometer.c:48:6:Accelerometer_Read	1
+../Core/Src/accelerometer.c:86:6:angles_from_accel	1
+../Core/Src/accelerometer.c:102:6:angles_rate_from_gyro	1
+../Core/Src/accelerometer.c:120:6:Kalman_Init	1
+../Core/Src/accelerometer.c:158:6:Kalman_GetAngle	1

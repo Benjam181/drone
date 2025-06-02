@@ -1,0 +1,1002 @@
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 1
+
+
+   1              		.cpu cortex-m4
+   2              		.arch armv7e-m
+   3              		.fpu fpv4-sp-d16
+   4              		.eabi_attribute 27, 1
+   5              		.eabi_attribute 28, 1
+   6              		.eabi_attribute 20, 1
+   7              		.eabi_attribute 21, 1
+   8              		.eabi_attribute 23, 3
+   9              		.eabi_attribute 24, 1
+  10              		.eabi_attribute 25, 1
+  11              		.eabi_attribute 26, 1
+  12              		.eabi_attribute 30, 1
+  13              		.eabi_attribute 34, 1
+  14              		.eabi_attribute 18, 4
+  15              		.file	"accelerometer.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.file 1 "Core/Src/accelerometer.c"
+  20              		.section	.text.Accelerometer_Init,"ax",%progbits
+  21              		.align	1
+  22              		.global	Accelerometer_Init
+  23              		.syntax unified
+  24              		.thumb
+  25              		.thumb_func
+  27              	Accelerometer_Init:
+  28              	.LVL0:
+  29              	.LFB132:
+   1:Core/Src/accelerometer.c **** #include "accelerometer.h"
+   2:Core/Src/accelerometer.c **** 
+   3:Core/Src/accelerometer.c **** #define MPU6050_ADDR (0x68 << 1) // Adresse I2C en 8 bits
+   4:Core/Src/accelerometer.c **** 
+   5:Core/Src/accelerometer.c **** /**
+   6:Core/Src/accelerometer.c ****  * @brief Initializes the accelerometer hardware and configures its settings.
+   7:Core/Src/accelerometer.c ****  *
+   8:Core/Src/accelerometer.c ****  * This function sets up the accelerometer by configuring the necessary hardware
+   9:Core/Src/accelerometer.c ****  * registers, communication interfaces (such as I2C or SPI), and any required
+  10:Core/Src/accelerometer.c ****  * initialization parameters. It prepares the accelerometer for data acquisition
+  11:Core/Src/accelerometer.c ****  * and ensures it is ready for operation.
+  12:Core/Src/accelerometer.c ****  *
+  13:Core/Src/accelerometer.c ****  * @note This function should be called before attempting to read data from the accelerometer.
+  14:Core/Src/accelerometer.c ****  */
+  15:Core/Src/accelerometer.c **** void Accelerometer_Init(I2C_HandleTypeDef *hi2c)
+  16:Core/Src/accelerometer.c **** {
+  30              		.loc 1 16 1 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 8
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+  34              		.loc 1 16 1 is_stmt 0 view .LVU1
+  35 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+  36              		.cfi_def_cfa_offset 24
+  37              		.cfi_offset 4, -24
+  38              		.cfi_offset 5, -20
+  39              		.cfi_offset 6, -16
+  40              		.cfi_offset 7, -12
+  41              		.cfi_offset 8, -8
+  42              		.cfi_offset 14, -4
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 2
+
+
+  43 0004 86B0     		sub	sp, sp, #24
+  44              		.cfi_def_cfa_offset 48
+  45 0006 0446     		mov	r4, r0
+  17:Core/Src/accelerometer.c ****     uint8_t data = 0;
+  46              		.loc 1 17 5 is_stmt 1 view .LVU2
+  47              		.loc 1 17 13 is_stmt 0 view .LVU3
+  48 0008 0023     		movs	r3, #0
+  49 000a 8DF81730 		strb	r3, [sp, #23]
+  18:Core/Src/accelerometer.c ****     uint8_t check;
+  50              		.loc 1 18 5 is_stmt 1 view .LVU4
+  19:Core/Src/accelerometer.c ****     // Read WHO_AM_I register (0x75) to check if the device is connected
+  20:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, 0x75, 1, &check, 1, 1000);
+  51              		.loc 1 20 5 view .LVU5
+  52 000e 4FF47A73 		mov	r3, #1000
+  53 0012 0293     		str	r3, [sp, #8]
+  54 0014 0123     		movs	r3, #1
+  55 0016 0193     		str	r3, [sp, #4]
+  56 0018 0DF11602 		add	r2, sp, #22
+  57 001c 0092     		str	r2, [sp]
+  58 001e 7522     		movs	r2, #117
+  59 0020 D021     		movs	r1, #208
+  60 0022 FFF7FEFF 		bl	HAL_I2C_Mem_Read
+  61              	.LVL1:
+  21:Core/Src/accelerometer.c ****     if (check != 0x68) {
+  62              		.loc 1 21 5 view .LVU6
+  63              		.loc 1 21 15 is_stmt 0 view .LVU7
+  64 0026 9DF81630 		ldrb	r3, [sp, #22]	@ zero_extendqisi2
+  65              		.loc 1 21 8 view .LVU8
+  66 002a 682B     		cmp	r3, #104
+  67 002c 02D0     		beq	.L5
+  68              	.L1:
+  22:Core/Src/accelerometer.c ****         // Device not found, handle error
+  23:Core/Src/accelerometer.c ****         return;
+  24:Core/Src/accelerometer.c ****     }
+  25:Core/Src/accelerometer.c ****     // PWR_MGMT_1 Register (0x6B) : wake-up
+  26:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x6B, 1, &data, 1, 1000);
+  27:Core/Src/accelerometer.c ****     // Set DATA RATE of 1kHz by writing SMPLRT_DIV register
+  28:Core/Src/accelerometer.c ****     data = 0x07; // 1000 Hz / (1 + 7) = 125 Hz
+  29:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x19, 1, &data, 1, 1000);
+  30:Core/Src/accelerometer.c ****     // Set accelerometer configuration in ACCEL_CONFIG Register (0x1C)
+  31:Core/Src/accelerometer.c ****     data = 0x00; // ±2g full scale
+  32:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x1C, 1, &data, 1, 1000);
+  33:Core/Src/accelerometer.c ****     // set Gyroscopic configuration in GYRO_CONFIG Register (0x1B)
+  34:Core/Src/accelerometer.c ****     data = 0x00; // ±250°/s full scale
+  35:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x1B, 1, &data, 1, 1000);
+  36:Core/Src/accelerometer.c **** }
+  69              		.loc 1 36 1 view .LVU9
+  70 002e 06B0     		add	sp, sp, #24
+  71              		.cfi_remember_state
+  72              		.cfi_def_cfa_offset 24
+  73              		@ sp needed
+  74 0030 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+  75              	.LVL2:
+  76              	.L5:
+  77              		.cfi_restore_state
+  26:Core/Src/accelerometer.c ****     // Set DATA RATE of 1kHz by writing SMPLRT_DIV register
+  78              		.loc 1 26 5 is_stmt 1 view .LVU10
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 3
+
+
+  79 0034 4FF47A77 		mov	r7, #1000
+  80 0038 0297     		str	r7, [sp, #8]
+  81 003a 0125     		movs	r5, #1
+  82 003c 0195     		str	r5, [sp, #4]
+  83 003e 0DF11706 		add	r6, sp, #23
+  84 0042 0096     		str	r6, [sp]
+  85 0044 2B46     		mov	r3, r5
+  86 0046 6B22     		movs	r2, #107
+  87 0048 D021     		movs	r1, #208
+  88 004a 2046     		mov	r0, r4
+  89 004c FFF7FEFF 		bl	HAL_I2C_Mem_Write
+  90              	.LVL3:
+  28:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x19, 1, &data, 1, 1000);
+  91              		.loc 1 28 5 view .LVU11
+  28:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x19, 1, &data, 1, 1000);
+  92              		.loc 1 28 10 is_stmt 0 view .LVU12
+  93 0050 0723     		movs	r3, #7
+  94 0052 8DF81730 		strb	r3, [sp, #23]
+  29:Core/Src/accelerometer.c ****     // Set accelerometer configuration in ACCEL_CONFIG Register (0x1C)
+  95              		.loc 1 29 5 is_stmt 1 view .LVU13
+  96 0056 0297     		str	r7, [sp, #8]
+  97 0058 0195     		str	r5, [sp, #4]
+  98 005a 0096     		str	r6, [sp]
+  99 005c 2B46     		mov	r3, r5
+ 100 005e 1922     		movs	r2, #25
+ 101 0060 D021     		movs	r1, #208
+ 102 0062 2046     		mov	r0, r4
+ 103 0064 FFF7FEFF 		bl	HAL_I2C_Mem_Write
+ 104              	.LVL4:
+  31:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x1C, 1, &data, 1, 1000);
+ 105              		.loc 1 31 5 view .LVU14
+  31:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x1C, 1, &data, 1, 1000);
+ 106              		.loc 1 31 10 is_stmt 0 view .LVU15
+ 107 0068 4FF00008 		mov	r8, #0
+ 108 006c 8DF81780 		strb	r8, [sp, #23]
+  32:Core/Src/accelerometer.c ****     // set Gyroscopic configuration in GYRO_CONFIG Register (0x1B)
+ 109              		.loc 1 32 5 is_stmt 1 view .LVU16
+ 110 0070 0297     		str	r7, [sp, #8]
+ 111 0072 0195     		str	r5, [sp, #4]
+ 112 0074 0096     		str	r6, [sp]
+ 113 0076 2B46     		mov	r3, r5
+ 114 0078 1C22     		movs	r2, #28
+ 115 007a D021     		movs	r1, #208
+ 116 007c 2046     		mov	r0, r4
+ 117 007e FFF7FEFF 		bl	HAL_I2C_Mem_Write
+ 118              	.LVL5:
+  34:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x1B, 1, &data, 1, 1000);
+ 119              		.loc 1 34 5 view .LVU17
+  34:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, 0x1B, 1, &data, 1, 1000);
+ 120              		.loc 1 34 10 is_stmt 0 view .LVU18
+ 121 0082 8DF81780 		strb	r8, [sp, #23]
+  35:Core/Src/accelerometer.c **** }
+ 122              		.loc 1 35 5 is_stmt 1 view .LVU19
+ 123 0086 0297     		str	r7, [sp, #8]
+ 124 0088 0195     		str	r5, [sp, #4]
+ 125 008a 0096     		str	r6, [sp]
+ 126 008c 2B46     		mov	r3, r5
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 4
+
+
+ 127 008e 1B22     		movs	r2, #27
+ 128 0090 D021     		movs	r1, #208
+ 129 0092 2046     		mov	r0, r4
+ 130 0094 FFF7FEFF 		bl	HAL_I2C_Mem_Write
+ 131              	.LVL6:
+ 132 0098 C9E7     		b	.L1
+ 133              		.cfi_endproc
+ 134              	.LFE132:
+ 136              		.section	.text.Accelerometer_Read,"ax",%progbits
+ 137              		.align	1
+ 138              		.global	Accelerometer_Read
+ 139              		.syntax unified
+ 140              		.thumb
+ 141              		.thumb_func
+ 143              	Accelerometer_Read:
+ 144              	.LVL7:
+ 145              	.LFB133:
+  37:Core/Src/accelerometer.c **** 
+  38:Core/Src/accelerometer.c **** /**
+  39:Core/Src/accelerometer.c ****  * @brief Reads the current acceleration values from the accelerometer sensor.
+  40:Core/Src/accelerometer.c ****  *
+  41:Core/Src/accelerometer.c ****  * This function communicates with the accelerometer hardware to retrieve the latest
+  42:Core/Src/accelerometer.c ****  * acceleration data, typically along the X, Y, and Z axes. The retrieved values can be
+  43:Core/Src/accelerometer.c ****  * used for motion detection, orientation sensing, or other applications requiring
+  44:Core/Src/accelerometer.c ****  * acceleration information.
+  45:Core/Src/accelerometer.c ****  *
+  46:Core/Src/accelerometer.c ****  * @return int Returns 0 on success, or a negative error code on failure.
+  47:Core/Src/accelerometer.c ****  */
+  48:Core/Src/accelerometer.c **** void Accelerometer_Read(I2C_HandleTypeDef *hi2c, AccelData *accel_data, GyroData *gyro_data)
+  49:Core/Src/accelerometer.c **** {    
+ 146              		.loc 1 49 1 view -0
+ 147              		.cfi_startproc
+ 148              		@ args = 0, pretend = 0, frame = 8
+ 149              		@ frame_needed = 0, uses_anonymous_args = 0
+ 150              		.loc 1 49 1 is_stmt 0 view .LVU21
+ 151 0000 2DE9F043 		push	{r4, r5, r6, r7, r8, r9, lr}
+ 152              		.cfi_def_cfa_offset 28
+ 153              		.cfi_offset 4, -28
+ 154              		.cfi_offset 5, -24
+ 155              		.cfi_offset 6, -20
+ 156              		.cfi_offset 7, -16
+ 157              		.cfi_offset 8, -12
+ 158              		.cfi_offset 9, -8
+ 159              		.cfi_offset 14, -4
+ 160 0004 87B0     		sub	sp, sp, #28
+ 161              		.cfi_def_cfa_offset 56
+ 162 0006 0646     		mov	r6, r0
+ 163 0008 0D46     		mov	r5, r1
+ 164 000a 1446     		mov	r4, r2
+  50:Core/Src/accelerometer.c ****     uint8_t Rec_Data[6];
+ 165              		.loc 1 50 5 is_stmt 1 view .LVU22
+  51:Core/Src/accelerometer.c **** 
+  52:Core/Src/accelerometer.c ****     // Read 6 BYTES of data starting from ACCEL_XOUT_H (0x3B) Register
+  53:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, 0x3B, 1, Rec_Data, 6, 1000);
+ 166              		.loc 1 53 5 view .LVU23
+ 167 000c 4FF47A79 		mov	r9, #1000
+ 168 0010 CDF80890 		str	r9, [sp, #8]
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 5
+
+
+ 169 0014 4FF00608 		mov	r8, #6
+ 170 0018 CDF80480 		str	r8, [sp, #4]
+ 171 001c 04AF     		add	r7, sp, #16
+ 172 001e 0097     		str	r7, [sp]
+ 173 0020 0123     		movs	r3, #1
+ 174 0022 3B22     		movs	r2, #59
+ 175              	.LVL8:
+ 176              		.loc 1 53 5 is_stmt 0 view .LVU24
+ 177 0024 D021     		movs	r1, #208
+ 178              	.LVL9:
+ 179              		.loc 1 53 5 view .LVU25
+ 180 0026 FFF7FEFF 		bl	HAL_I2C_Mem_Read
+ 181              	.LVL10:
+  54:Core/Src/accelerometer.c ****     // Convert the data to 16-bit signed integers
+  55:Core/Src/accelerometer.c ****     accel_data->x = (int16_t)((Rec_Data[0] << 8) | Rec_Data[1]);
+ 182              		.loc 1 55 5 is_stmt 1 view .LVU26
+ 183              		.loc 1 55 40 is_stmt 0 view .LVU27
+ 184 002a 9DF81020 		ldrb	r2, [sp, #16]	@ zero_extendqisi2
+ 185              		.loc 1 55 60 view .LVU28
+ 186 002e 9DF81130 		ldrb	r3, [sp, #17]	@ zero_extendqisi2
+ 187              		.loc 1 55 21 view .LVU29
+ 188 0032 43EA0223 		orr	r3, r3, r2, lsl #8
+ 189 0036 1BB2     		sxth	r3, r3
+ 190              		.loc 1 55 19 view .LVU30
+ 191 0038 07EE903A 		vmov	s15, r3	@ int
+ 192 003c F8EEE76A 		vcvt.f32.s32	s13, s15
+ 193 0040 C5ED006A 		vstr.32	s13, [r5]
+  56:Core/Src/accelerometer.c ****     accel_data->y = (int16_t)((Rec_Data[2] << 8) | Rec_Data[3]);
+ 194              		.loc 1 56 5 is_stmt 1 view .LVU31
+ 195              		.loc 1 56 40 is_stmt 0 view .LVU32
+ 196 0044 9DF81220 		ldrb	r2, [sp, #18]	@ zero_extendqisi2
+ 197              		.loc 1 56 60 view .LVU33
+ 198 0048 9DF81330 		ldrb	r3, [sp, #19]	@ zero_extendqisi2
+ 199              		.loc 1 56 21 view .LVU34
+ 200 004c 43EA0223 		orr	r3, r3, r2, lsl #8
+ 201 0050 1BB2     		sxth	r3, r3
+ 202              		.loc 1 56 19 view .LVU35
+ 203 0052 07EE903A 		vmov	s15, r3	@ int
+ 204 0056 B8EEE77A 		vcvt.f32.s32	s14, s15
+ 205 005a 85ED017A 		vstr.32	s14, [r5, #4]
+  57:Core/Src/accelerometer.c ****     accel_data->z = (int16_t)((Rec_Data[4] << 8) | Rec_Data[5]);
+ 206              		.loc 1 57 5 is_stmt 1 view .LVU36
+ 207              		.loc 1 57 40 is_stmt 0 view .LVU37
+ 208 005e 9DF81420 		ldrb	r2, [sp, #20]	@ zero_extendqisi2
+ 209              		.loc 1 57 60 view .LVU38
+ 210 0062 9DF81530 		ldrb	r3, [sp, #21]	@ zero_extendqisi2
+ 211              		.loc 1 57 21 view .LVU39
+ 212 0066 43EA0223 		orr	r3, r3, r2, lsl #8
+ 213 006a 1BB2     		sxth	r3, r3
+ 214              		.loc 1 57 19 view .LVU40
+ 215 006c 07EE903A 		vmov	s15, r3	@ int
+ 216 0070 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 217 0074 C5ED027A 		vstr.32	s15, [r5, #8]
+  58:Core/Src/accelerometer.c ****     // Convert raw value to g-force
+  59:Core/Src/accelerometer.c ****     accel_data->x = (float)accel_data->x / 16384.0f; // For ±2g full scale
+ 218              		.loc 1 59 5 is_stmt 1 view .LVU41
+ 219              		.loc 1 59 42 is_stmt 0 view .LVU42
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 6
+
+
+ 220 0078 9FED286A 		vldr.32	s12, .L8
+ 221 007c 66EE866A 		vmul.f32	s13, s13, s12
+ 222              		.loc 1 59 19 view .LVU43
+ 223 0080 C5ED006A 		vstr.32	s13, [r5]
+  60:Core/Src/accelerometer.c ****     accel_data->y = (float)accel_data->y / 16384.0f; 
+ 224              		.loc 1 60 5 is_stmt 1 view .LVU44
+ 225              		.loc 1 60 42 is_stmt 0 view .LVU45
+ 226 0084 27EE067A 		vmul.f32	s14, s14, s12
+ 227              		.loc 1 60 19 view .LVU46
+ 228 0088 85ED017A 		vstr.32	s14, [r5, #4]
+  61:Core/Src/accelerometer.c ****     accel_data->z = (float)accel_data->z / 16384.0f;
+ 229              		.loc 1 61 5 is_stmt 1 view .LVU47
+ 230              		.loc 1 61 42 is_stmt 0 view .LVU48
+ 231 008c 67EE867A 		vmul.f32	s15, s15, s12
+ 232              		.loc 1 61 19 view .LVU49
+ 233 0090 C5ED027A 		vstr.32	s15, [r5, #8]
+  62:Core/Src/accelerometer.c **** 
+  63:Core/Src/accelerometer.c ****     // Read 6 BYTES of data starting from GYRO_XOUT_H (0x43) Register
+  64:Core/Src/accelerometer.c ****     HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, 0x43, 1, Rec_Data, 6, 1000);
+ 234              		.loc 1 64 5 is_stmt 1 view .LVU50
+ 235 0094 CDF80890 		str	r9, [sp, #8]
+ 236 0098 CDF80480 		str	r8, [sp, #4]
+ 237 009c 0097     		str	r7, [sp]
+ 238 009e 0123     		movs	r3, #1
+ 239 00a0 4322     		movs	r2, #67
+ 240 00a2 D021     		movs	r1, #208
+ 241 00a4 3046     		mov	r0, r6
+ 242 00a6 FFF7FEFF 		bl	HAL_I2C_Mem_Read
+ 243              	.LVL11:
+  65:Core/Src/accelerometer.c ****     // Convert the data to 16-bit signed integers
+  66:Core/Src/accelerometer.c ****     gyro_data->x = (int16_t)((Rec_Data[0] << 8) | Rec_Data[1]);
+ 244              		.loc 1 66 5 view .LVU51
+ 245              		.loc 1 66 39 is_stmt 0 view .LVU52
+ 246 00aa 9DF81020 		ldrb	r2, [sp, #16]	@ zero_extendqisi2
+ 247              		.loc 1 66 59 view .LVU53
+ 248 00ae 9DF81130 		ldrb	r3, [sp, #17]	@ zero_extendqisi2
+ 249              		.loc 1 66 20 view .LVU54
+ 250 00b2 43EA0223 		orr	r3, r3, r2, lsl #8
+ 251 00b6 1BB2     		sxth	r3, r3
+ 252              		.loc 1 66 18 view .LVU55
+ 253 00b8 07EE903A 		vmov	s15, r3	@ int
+ 254 00bc F8EEE76A 		vcvt.f32.s32	s13, s15
+ 255 00c0 C4ED006A 		vstr.32	s13, [r4]
+  67:Core/Src/accelerometer.c ****     gyro_data->y = (int16_t)((Rec_Data[2] << 8) | Rec_Data[3]);
+ 256              		.loc 1 67 5 is_stmt 1 view .LVU56
+ 257              		.loc 1 67 39 is_stmt 0 view .LVU57
+ 258 00c4 9DF81220 		ldrb	r2, [sp, #18]	@ zero_extendqisi2
+ 259              		.loc 1 67 59 view .LVU58
+ 260 00c8 9DF81330 		ldrb	r3, [sp, #19]	@ zero_extendqisi2
+ 261              		.loc 1 67 20 view .LVU59
+ 262 00cc 43EA0223 		orr	r3, r3, r2, lsl #8
+ 263 00d0 1BB2     		sxth	r3, r3
+ 264              		.loc 1 67 18 view .LVU60
+ 265 00d2 07EE903A 		vmov	s15, r3	@ int
+ 266 00d6 B8EEE77A 		vcvt.f32.s32	s14, s15
+ 267 00da 84ED017A 		vstr.32	s14, [r4, #4]
+  68:Core/Src/accelerometer.c ****     gyro_data->z = (int16_t)((Rec_Data[4] << 8) | Rec_Data[5]);
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 7
+
+
+ 268              		.loc 1 68 5 is_stmt 1 view .LVU61
+ 269              		.loc 1 68 39 is_stmt 0 view .LVU62
+ 270 00de 9DF81420 		ldrb	r2, [sp, #20]	@ zero_extendqisi2
+ 271              		.loc 1 68 59 view .LVU63
+ 272 00e2 9DF81530 		ldrb	r3, [sp, #21]	@ zero_extendqisi2
+ 273              		.loc 1 68 20 view .LVU64
+ 274 00e6 43EA0223 		orr	r3, r3, r2, lsl #8
+ 275 00ea 1BB2     		sxth	r3, r3
+ 276              		.loc 1 68 18 view .LVU65
+ 277 00ec 07EE903A 		vmov	s15, r3	@ int
+ 278 00f0 F8EEE77A 		vcvt.f32.s32	s15, s15
+ 279 00f4 C4ED027A 		vstr.32	s15, [r4, #8]
+  69:Core/Src/accelerometer.c ****     // Convert raw value to degrees per second
+  70:Core/Src/accelerometer.c ****     gyro_data->x = (float)gyro_data->x / 131.0f; // For ±250°/s full scale
+ 280              		.loc 1 70 5 is_stmt 1 view .LVU66
+ 281              		.loc 1 70 40 is_stmt 0 view .LVU67
+ 282 00f8 9FED096A 		vldr.32	s12, .L8+4
+ 283 00fc C6EE865A 		vdiv.f32	s11, s13, s12
+ 284              		.loc 1 70 18 view .LVU68
+ 285 0100 C4ED005A 		vstr.32	s11, [r4]
+  71:Core/Src/accelerometer.c ****     gyro_data->y = (float)gyro_data->y / 131.0f;
+ 286              		.loc 1 71 5 is_stmt 1 view .LVU69
+ 287              		.loc 1 71 40 is_stmt 0 view .LVU70
+ 288 0104 C7EE066A 		vdiv.f32	s13, s14, s12
+ 289              		.loc 1 71 18 view .LVU71
+ 290 0108 C4ED016A 		vstr.32	s13, [r4, #4]
+  72:Core/Src/accelerometer.c ****     gyro_data->z = (float)gyro_data->z / 131.0f; 
+ 291              		.loc 1 72 5 is_stmt 1 view .LVU72
+ 292              		.loc 1 72 40 is_stmt 0 view .LVU73
+ 293 010c 87EE867A 		vdiv.f32	s14, s15, s12
+ 294              		.loc 1 72 18 view .LVU74
+ 295 0110 84ED027A 		vstr.32	s14, [r4, #8]
+  73:Core/Src/accelerometer.c **** }
+ 296              		.loc 1 73 1 view .LVU75
+ 297 0114 07B0     		add	sp, sp, #28
+ 298              		.cfi_def_cfa_offset 28
+ 299              		@ sp needed
+ 300 0116 BDE8F083 		pop	{r4, r5, r6, r7, r8, r9, pc}
+ 301              	.LVL12:
+ 302              	.L9:
+ 303              		.loc 1 73 1 view .LVU76
+ 304 011a 00BF     		.align	2
+ 305              	.L8:
+ 306 011c 00008038 		.word	947912704
+ 307 0120 00000343 		.word	1124270080
+ 308              		.cfi_endproc
+ 309              	.LFE133:
+ 311              		.section	.text.angles_from_accel,"ax",%progbits
+ 312              		.align	1
+ 313              		.global	angles_from_accel
+ 314              		.syntax unified
+ 315              		.thumb
+ 316              		.thumb_func
+ 318              	angles_from_accel:
+ 319              	.LVL13:
+ 320              	.LFB134:
+  74:Core/Src/accelerometer.c **** 
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 8
+
+
+  75:Core/Src/accelerometer.c **** /**
+  76:Core/Src/accelerometer.c ****  * @brief Calculates the pitch and roll angles from accelerometer data.
+  77:Core/Src/accelerometer.c ****  *
+  78:Core/Src/accelerometer.c ****  * This function computes the pitch and roll angles based on the accelerometer's
+  79:Core/Src/accelerometer.c ****  * x, y, and z axis readings. The angles are calculated using trigonometric functions
+  80:Core/Src/accelerometer.c ****  * to determine the orientation of the device in space.
+  81:Core/Src/accelerometer.c ****  *
+  82:Core/Src/accelerometer.c ****  * @param accel_data Structure containing accelerometer data (x, y, z).
+  83:Core/Src/accelerometer.c ****  * @param pitch Pointer to store the calculated pitch angle (in degrees).
+  84:Core/Src/accelerometer.c ****  * @param roll Pointer to store the calculated roll angle (in degrees).
+  85:Core/Src/accelerometer.c ****  */
+  86:Core/Src/accelerometer.c **** void angles_from_accel(AccelData accel_data, float *pitch, float *roll) {
+ 321              		.loc 1 86 73 is_stmt 1 view -0
+ 322              		.cfi_startproc
+ 323              		@ args = 0, pretend = 0, frame = 16
+ 324              		@ frame_needed = 0, uses_anonymous_args = 0
+ 325              		.loc 1 86 73 is_stmt 0 view .LVU78
+ 326 0000 30B5     		push	{r4, r5, lr}
+ 327              		.cfi_def_cfa_offset 12
+ 328              		.cfi_offset 4, -12
+ 329              		.cfi_offset 5, -8
+ 330              		.cfi_offset 14, -4
+ 331 0002 2DED048B 		vpush.64	{d8, d9}
+ 332              		.cfi_def_cfa_offset 28
+ 333              		.cfi_offset 80, -28
+ 334              		.cfi_offset 81, -24
+ 335              		.cfi_offset 82, -20
+ 336              		.cfi_offset 83, -16
+ 337 0006 85B0     		sub	sp, sp, #20
+ 338              		.cfi_def_cfa_offset 48
+ 339 0008 B0EE409A 		vmov.f32	s18, s0
+ 340 000c B0EE608A 		vmov.f32	s16, s1
+ 341 0010 0546     		mov	r5, r0
+ 342 0012 0C46     		mov	r4, r1
+ 343 0014 8DED010A 		vstr.32	s0, [sp, #4]
+ 344 0018 CDED020A 		vstr.32	s1, [sp, #8]
+ 345 001c 8DED031A 		vstr.32	s2, [sp, #12]
+  87:Core/Src/accelerometer.c ****     *pitch = atan2f(accel_data.y, sqrtf(accel_data.x * accel_data.x + accel_data.z * accel_data.z))
+ 346              		.loc 1 87 5 is_stmt 1 view .LVU79
+ 347              		.loc 1 87 54 is_stmt 0 view .LVU80
+ 348 0020 20EE000A 		vmul.f32	s0, s0, s0
+ 349              		.loc 1 87 84 view .LVU81
+ 350 0024 61EE018A 		vmul.f32	s17, s2, s2
+ 351              		.loc 1 87 14 view .LVU82
+ 352 0028 30EE280A 		vadd.f32	s0, s0, s17
+ 353 002c FFF7FEFF 		bl	sqrtf
+ 354              	.LVL14:
+ 355              		.loc 1 87 14 view .LVU83
+ 356 0030 F0EE400A 		vmov.f32	s1, s0
+ 357              		.loc 1 87 14 discriminator 1 view .LVU84
+ 358 0034 B0EE480A 		vmov.f32	s0, s16
+ 359 0038 FFF7FEFF 		bl	atan2f
+ 360              	.LVL15:
+ 361 003c 10EE100A 		vmov	r0, s0
+ 362              		.loc 1 87 14 discriminator 2 view .LVU85
+ 363 0040 FFF7FEFF 		bl	__aeabi_f2d
+ 364              	.LVL16:
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 9
+
+
+ 365              		.loc 1 87 101 discriminator 2 view .LVU86
+ 366 0044 12A3     		adr	r3, .L12
+ 367 0046 D3E90023 		ldrd	r2, [r3]
+ 368 004a FFF7FEFF 		bl	__aeabi_dmul
+ 369              	.LVL17:
+ 370 004e FFF7FEFF 		bl	__aeabi_d2f
+ 371              	.LVL18:
+ 372              		.loc 1 87 12 discriminator 2 view .LVU87
+ 373 0052 2860     		str	r0, [r5]	@ float
+  88:Core/Src/accelerometer.c ****     *roll = atan2f(-accel_data.x, sqrtf(accel_data.y * accel_data.y + accel_data.z * accel_data.z))
+ 374              		.loc 1 88 5 is_stmt 1 view .LVU88
+ 375              		.loc 1 88 54 is_stmt 0 view .LVU89
+ 376 0054 28EE088A 		vmul.f32	s16, s16, s16
+ 377              		.loc 1 88 13 view .LVU90
+ 378 0058 38EE880A 		vadd.f32	s0, s17, s16
+ 379 005c FFF7FEFF 		bl	sqrtf
+ 380              	.LVL19:
+ 381 0060 F0EE400A 		vmov.f32	s1, s0
+ 382              		.loc 1 88 13 discriminator 1 view .LVU91
+ 383 0064 B1EE490A 		vneg.f32	s0, s18
+ 384 0068 FFF7FEFF 		bl	atan2f
+ 385              	.LVL20:
+ 386 006c 10EE100A 		vmov	r0, s0
+ 387              		.loc 1 88 13 discriminator 2 view .LVU92
+ 388 0070 FFF7FEFF 		bl	__aeabi_f2d
+ 389              	.LVL21:
+ 390              		.loc 1 88 101 discriminator 2 view .LVU93
+ 391 0074 06A3     		adr	r3, .L12
+ 392 0076 D3E90023 		ldrd	r2, [r3]
+ 393 007a FFF7FEFF 		bl	__aeabi_dmul
+ 394              	.LVL22:
+ 395 007e FFF7FEFF 		bl	__aeabi_d2f
+ 396              	.LVL23:
+ 397              		.loc 1 88 11 discriminator 2 view .LVU94
+ 398 0082 2060     		str	r0, [r4]	@ float
+  89:Core/Src/accelerometer.c **** }
+ 399              		.loc 1 89 1 view .LVU95
+ 400 0084 05B0     		add	sp, sp, #20
+ 401              		.cfi_def_cfa_offset 28
+ 402              		@ sp needed
+ 403 0086 BDEC048B 		vldm	sp!, {d8-d9}
+ 404              		.cfi_restore 82
+ 405              		.cfi_restore 83
+ 406              		.cfi_restore 80
+ 407              		.cfi_restore 81
+ 408              		.cfi_def_cfa_offset 12
+ 409 008a 30BD     		pop	{r4, r5, pc}
+ 410              	.LVL24:
+ 411              	.L13:
+ 412              		.loc 1 89 1 view .LVU96
+ 413 008c AFF30080 		.align	3
+ 414              	.L12:
+ 415 0090 F8C1631A 		.word	442745336
+ 416 0094 DCA54C40 		.word	1078765020
+ 417              		.cfi_endproc
+ 418              	.LFE134:
+ 420              		.section	.text.angles_rate_from_gyro,"ax",%progbits
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 10
+
+
+ 421              		.align	1
+ 422              		.global	angles_rate_from_gyro
+ 423              		.syntax unified
+ 424              		.thumb
+ 425              		.thumb_func
+ 427              	angles_rate_from_gyro:
+ 428              	.LVL25:
+ 429              	.LFB135:
+  90:Core/Src/accelerometer.c **** 
+  91:Core/Src/accelerometer.c **** /**
+  92:Core/Src/accelerometer.c ****  * @brief Calculates the pitch and roll rates from gyroscope data.
+  93:Core/Src/accelerometer.c ****  *
+  94:Core/Src/accelerometer.c ****  * This function computes the pitch and roll rates based on the gyroscope's
+  95:Core/Src/accelerometer.c ****  * x and y axis readings. The rates are derived directly from the gyroscope data,
+  96:Core/Src/accelerometer.c ****  * which provides angular velocity measurements.
+  97:Core/Src/accelerometer.c ****  *
+  98:Core/Src/accelerometer.c ****  * @param gyro_data Structure containing gyroscope data (x, y, z).
+  99:Core/Src/accelerometer.c ****  * @param pitch_rate Pointer to store the calculated pitch rate (in degrees per second).
+ 100:Core/Src/accelerometer.c ****  * @param roll_rate Pointer to store the calculated roll rate (in degrees per second).
+ 101:Core/Src/accelerometer.c ****  */
+ 102:Core/Src/accelerometer.c **** void angles_rate_from_gyro(GyroData gyro_data, float *pitch_rate, float *roll_rate) {
+ 430              		.loc 1 102 85 is_stmt 1 view -0
+ 431              		.cfi_startproc
+ 432              		@ args = 0, pretend = 0, frame = 16
+ 433              		@ frame_needed = 0, uses_anonymous_args = 0
+ 434              		@ link register save eliminated.
+ 435              		.loc 1 102 85 is_stmt 0 view .LVU98
+ 436 0000 84B0     		sub	sp, sp, #16
+ 437              		.cfi_def_cfa_offset 16
+ 438 0002 8DED010A 		vstr.32	s0, [sp, #4]
+ 439 0006 CDED020A 		vstr.32	s1, [sp, #8]
+ 440 000a 8DED031A 		vstr.32	s2, [sp, #12]
+ 103:Core/Src/accelerometer.c ****     *pitch_rate = gyro_data.y; // Gyro Y-axis for pitch rate
+ 441              		.loc 1 103 5 is_stmt 1 view .LVU99
+ 442              		.loc 1 103 17 is_stmt 0 view .LVU100
+ 443 000e C0ED000A 		vstr.32	s1, [r0]
+ 104:Core/Src/accelerometer.c ****     *roll_rate = gyro_data.x;  // Gyro X-axis for roll rate
+ 444              		.loc 1 104 5 is_stmt 1 view .LVU101
+ 445              		.loc 1 104 16 is_stmt 0 view .LVU102
+ 446 0012 81ED000A 		vstr.32	s0, [r1]
+ 105:Core/Src/accelerometer.c **** }
+ 447              		.loc 1 105 1 view .LVU103
+ 448 0016 04B0     		add	sp, sp, #16
+ 449              		.cfi_def_cfa_offset 0
+ 450              		@ sp needed
+ 451 0018 7047     		bx	lr
+ 452              		.cfi_endproc
+ 453              	.LFE135:
+ 455              		.section	.text.Kalman_Init,"ax",%progbits
+ 456              		.align	1
+ 457              		.global	Kalman_Init
+ 458              		.syntax unified
+ 459              		.thumb
+ 460              		.thumb_func
+ 462              	Kalman_Init:
+ 463              	.LVL26:
+ 464              	.LFB136:
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 11
+
+
+ 106:Core/Src/accelerometer.c **** 
+ 107:Core/Src/accelerometer.c **** /**
+ 108:Core/Src/accelerometer.c ****  * @brief Initializes the Kalman filter state.
+ 109:Core/Src/accelerometer.c ****  *
+ 110:Core/Src/accelerometer.c ****  * This function sets up the initial parameters for the Kalman filter, including
+ 111:Core/Src/accelerometer.c ****  * the initial state estimate, error covariance, process noise, and measurement noise.
+ 112:Core/Src/accelerometer.c ****  * It should be called before using the filter for prediction or update steps.
+ 113:Core/Src/accelerometer.c ****  *
+ 114:Core/Src/accelerometer.c ****  * @param kf Pointer to the Kalman filter structure to initialize.
+ 115:Core/Src/accelerometer.c ****  * @param init_state Initial estimate of the state.
+ 116:Core/Src/accelerometer.c ****  * @param init_covariance Initial estimate of the error covariance.
+ 117:Core/Src/accelerometer.c ****  * @param process_noise Process noise covariance (Q).
+ 118:Core/Src/accelerometer.c ****  * @param measurement_noise Measurement noise covariance (R).
+ 119:Core/Src/accelerometer.c ****  */
+ 120:Core/Src/accelerometer.c **** void Kalman_Init(Kalman_t *kalman_x, Kalman_t *kalman_y, Kalman_t *kalman_z)
+ 121:Core/Src/accelerometer.c **** {
+ 465              		.loc 1 121 1 is_stmt 1 view -0
+ 466              		.cfi_startproc
+ 467              		@ args = 0, pretend = 0, frame = 0
+ 468              		@ frame_needed = 0, uses_anonymous_args = 0
+ 469              		.loc 1 121 1 is_stmt 0 view .LVU105
+ 470 0000 00B5     		push	{lr}
+ 471              		.cfi_def_cfa_offset 4
+ 472              		.cfi_offset 14, -4
+ 122:Core/Src/accelerometer.c ****     // Initialize Kalman filter parameters for X, Y, and Z axes
+ 123:Core/Src/accelerometer.c ****     kalman_x->angle = 0.0f;
+ 473              		.loc 1 123 5 is_stmt 1 view .LVU106
+ 474              		.loc 1 123 21 is_stmt 0 view .LVU107
+ 475 0002 0023     		movs	r3, #0
+ 476 0004 0360     		str	r3, [r0]	@ float
+ 124:Core/Src/accelerometer.c ****     kalman_x->bias = 0.0f;
+ 477              		.loc 1 124 5 is_stmt 1 view .LVU108
+ 478              		.loc 1 124 20 is_stmt 0 view .LVU109
+ 479 0006 4360     		str	r3, [r0, #4]	@ float
+ 125:Core/Src/accelerometer.c ****     kalman_x->rate = 0.0f;
+ 480              		.loc 1 125 5 is_stmt 1 view .LVU110
+ 481              		.loc 1 125 20 is_stmt 0 view .LVU111
+ 482 0008 8360     		str	r3, [r0, #8]	@ float
+ 126:Core/Src/accelerometer.c ****     kalman_x->P[0][0] = 1.0f; // P[0][0]
+ 483              		.loc 1 126 5 is_stmt 1 view .LVU112
+ 484              		.loc 1 126 23 is_stmt 0 view .LVU113
+ 485 000a 4FF07E5C 		mov	ip, #1065353216
+ 486 000e C0F80CC0 		str	ip, [r0, #12]	@ float
+ 127:Core/Src/accelerometer.c ****     kalman_x->P[0][1] = 0.0f; // P[0][1]
+ 487              		.loc 1 127 5 is_stmt 1 view .LVU114
+ 488              		.loc 1 127 23 is_stmt 0 view .LVU115
+ 489 0012 0361     		str	r3, [r0, #16]	@ float
+ 128:Core/Src/accelerometer.c ****     kalman_x->P[1][0] = 0.0f; // P[1][0]
+ 490              		.loc 1 128 5 is_stmt 1 view .LVU116
+ 491              		.loc 1 128 23 is_stmt 0 view .LVU117
+ 492 0014 4361     		str	r3, [r0, #20]	@ float
+ 129:Core/Src/accelerometer.c ****     kalman_x->P[1][1] = 1.0f; // P[1][1]
+ 493              		.loc 1 129 5 is_stmt 1 view .LVU118
+ 494              		.loc 1 129 23 is_stmt 0 view .LVU119
+ 495 0016 C0F818C0 		str	ip, [r0, #24]	@ float
+ 130:Core/Src/accelerometer.c ****     kalman_x->Q_angle = 0.001f; // Process noise covariance for angle
+ 496              		.loc 1 130 5 is_stmt 1 view .LVU120
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 12
+
+
+ 497              		.loc 1 130 23 is_stmt 0 view .LVU121
+ 498 001a 9FED167A 		vldr.32	s14, .L18
+ 499 001e 80ED077A 		vstr.32	s14, [r0, #28]
+ 131:Core/Src/accelerometer.c ****     kalman_x->Q_bias = 0.003f; // Process noise covariance for bias
+ 500              		.loc 1 131 5 is_stmt 1 view .LVU122
+ 501              		.loc 1 131 22 is_stmt 0 view .LVU123
+ 502 0022 DFED157A 		vldr.32	s15, .L18+4
+ 503 0026 C0ED087A 		vstr.32	s15, [r0, #32]
+ 132:Core/Src/accelerometer.c ****     kalman_x->R_measure = 0.03f; // Measurement noise covariance
+ 504              		.loc 1 132 5 is_stmt 1 view .LVU124
+ 505              		.loc 1 132 25 is_stmt 0 view .LVU125
+ 506 002a DFF850E0 		ldr	lr, .L18+8
+ 507 002e C0F824E0 		str	lr, [r0, #36]	@ float
+ 133:Core/Src/accelerometer.c **** 
+ 134:Core/Src/accelerometer.c ****     kalman_y->angle = 0.0f;
+ 508              		.loc 1 134 5 is_stmt 1 view .LVU126
+ 509              		.loc 1 134 21 is_stmt 0 view .LVU127
+ 510 0032 0B60     		str	r3, [r1]	@ float
+ 135:Core/Src/accelerometer.c ****     kalman_y->bias = 0.0f;
+ 511              		.loc 1 135 5 is_stmt 1 view .LVU128
+ 512              		.loc 1 135 20 is_stmt 0 view .LVU129
+ 513 0034 4B60     		str	r3, [r1, #4]	@ float
+ 136:Core/Src/accelerometer.c ****     kalman_y->rate = 0.0f;
+ 514              		.loc 1 136 5 is_stmt 1 view .LVU130
+ 515              		.loc 1 136 20 is_stmt 0 view .LVU131
+ 516 0036 8B60     		str	r3, [r1, #8]	@ float
+ 137:Core/Src/accelerometer.c ****     kalman_y->P[0][0] = 1.0f;
+ 517              		.loc 1 137 5 is_stmt 1 view .LVU132
+ 518              		.loc 1 137 23 is_stmt 0 view .LVU133
+ 519 0038 C1F80CC0 		str	ip, [r1, #12]	@ float
+ 138:Core/Src/accelerometer.c ****     kalman_y->P[0][1] = 0.0f;
+ 520              		.loc 1 138 5 is_stmt 1 view .LVU134
+ 521              		.loc 1 138 23 is_stmt 0 view .LVU135
+ 522 003c 0B61     		str	r3, [r1, #16]	@ float
+ 139:Core/Src/accelerometer.c ****     kalman_y->P[1][0] = 0.0f;
+ 523              		.loc 1 139 5 is_stmt 1 view .LVU136
+ 524              		.loc 1 139 23 is_stmt 0 view .LVU137
+ 525 003e 4B61     		str	r3, [r1, #20]	@ float
+ 140:Core/Src/accelerometer.c ****     kalman_y->P[1][1] = 1.0f;
+ 526              		.loc 1 140 5 is_stmt 1 view .LVU138
+ 527              		.loc 1 140 23 is_stmt 0 view .LVU139
+ 528 0040 C1F818C0 		str	ip, [r1, #24]	@ float
+ 141:Core/Src/accelerometer.c ****     kalman_y->Q_angle = 0.001f;
+ 529              		.loc 1 141 5 is_stmt 1 view .LVU140
+ 530              		.loc 1 141 23 is_stmt 0 view .LVU141
+ 531 0044 81ED077A 		vstr.32	s14, [r1, #28]
+ 142:Core/Src/accelerometer.c ****     kalman_y->Q_bias = 0.003f;
+ 532              		.loc 1 142 5 is_stmt 1 view .LVU142
+ 533              		.loc 1 142 22 is_stmt 0 view .LVU143
+ 534 0048 C1ED087A 		vstr.32	s15, [r1, #32]
+ 143:Core/Src/accelerometer.c ****     kalman_y->R_measure = 0.03f;
+ 535              		.loc 1 143 5 is_stmt 1 view .LVU144
+ 536              		.loc 1 143 25 is_stmt 0 view .LVU145
+ 537 004c C1F824E0 		str	lr, [r1, #36]	@ float
+ 144:Core/Src/accelerometer.c **** 
+ 145:Core/Src/accelerometer.c ****     kalman_z->angle = 0.0f;
+ 538              		.loc 1 145 5 is_stmt 1 view .LVU146
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 13
+
+
+ 539              		.loc 1 145 21 is_stmt 0 view .LVU147
+ 540 0050 1360     		str	r3, [r2]	@ float
+ 146:Core/Src/accelerometer.c ****     kalman_z->bias = 0.0f;
+ 541              		.loc 1 146 5 is_stmt 1 view .LVU148
+ 542              		.loc 1 146 20 is_stmt 0 view .LVU149
+ 543 0052 5360     		str	r3, [r2, #4]	@ float
+ 147:Core/Src/accelerometer.c ****     kalman_z->rate = 0.0f;
+ 544              		.loc 1 147 5 is_stmt 1 view .LVU150
+ 545              		.loc 1 147 20 is_stmt 0 view .LVU151
+ 546 0054 9360     		str	r3, [r2, #8]	@ float
+ 148:Core/Src/accelerometer.c ****     kalman_z->P[0][0] = 1.0f;
+ 547              		.loc 1 148 5 is_stmt 1 view .LVU152
+ 548              		.loc 1 148 23 is_stmt 0 view .LVU153
+ 549 0056 C2F80CC0 		str	ip, [r2, #12]	@ float
+ 149:Core/Src/accelerometer.c ****     kalman_z->P[0][1] = 0.0f;
+ 550              		.loc 1 149 5 is_stmt 1 view .LVU154
+ 551              		.loc 1 149 23 is_stmt 0 view .LVU155
+ 552 005a 1361     		str	r3, [r2, #16]	@ float
+ 150:Core/Src/accelerometer.c ****     kalman_z->P[1][0] = 0.0f;
+ 553              		.loc 1 150 5 is_stmt 1 view .LVU156
+ 554              		.loc 1 150 23 is_stmt 0 view .LVU157
+ 555 005c 5361     		str	r3, [r2, #20]	@ float
+ 151:Core/Src/accelerometer.c ****     kalman_z->P[1][1] = 1.0f;
+ 556              		.loc 1 151 5 is_stmt 1 view .LVU158
+ 557              		.loc 1 151 23 is_stmt 0 view .LVU159
+ 558 005e C2F818C0 		str	ip, [r2, #24]	@ float
+ 152:Core/Src/accelerometer.c ****     kalman_z->Q_angle = 0.001f;
+ 559              		.loc 1 152 5 is_stmt 1 view .LVU160
+ 560              		.loc 1 152 23 is_stmt 0 view .LVU161
+ 561 0062 82ED077A 		vstr.32	s14, [r2, #28]
+ 153:Core/Src/accelerometer.c ****     kalman_z->Q_bias = 0.003f;
+ 562              		.loc 1 153 5 is_stmt 1 view .LVU162
+ 563              		.loc 1 153 22 is_stmt 0 view .LVU163
+ 564 0066 C2ED087A 		vstr.32	s15, [r2, #32]
+ 154:Core/Src/accelerometer.c ****     kalman_z->R_measure = 0.03f;
+ 565              		.loc 1 154 5 is_stmt 1 view .LVU164
+ 566              		.loc 1 154 25 is_stmt 0 view .LVU165
+ 567 006a C2F824E0 		str	lr, [r2, #36]	@ float
+ 155:Core/Src/accelerometer.c **** }
+ 568              		.loc 1 155 1 view .LVU166
+ 569 006e 5DF804FB 		ldr	pc, [sp], #4
+ 570              	.L19:
+ 571 0072 00BF     		.align	2
+ 572              	.L18:
+ 573 0074 6F12833A 		.word	981668463
+ 574 0078 A69B443B 		.word	994352038
+ 575 007c 8FC2F53C 		.word	1022739087
+ 576              		.cfi_endproc
+ 577              	.LFE136:
+ 579              		.section	.text.Kalman_GetAngle,"ax",%progbits
+ 580              		.align	1
+ 581              		.global	Kalman_GetAngle
+ 582              		.syntax unified
+ 583              		.thumb
+ 584              		.thumb_func
+ 586              	Kalman_GetAngle:
+ 587              	.LVL27:
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 14
+
+
+ 588              	.LFB137:
+ 156:Core/Src/accelerometer.c **** 
+ 157:Core/Src/accelerometer.c **** /**
+ 158:Core/Src/accelerometer.c ****  * @brief Computes the filtered angle using the Kalman filter algorithm.
+ 159:Core/Src/accelerometer.c ****  *
+ 160:Core/Src/accelerometer.c ****  * This function estimates the true angle by combining accelerometer and gyroscope data,
+ 161:Core/Src/accelerometer.c ****  * reducing noise and drift. It performs the prediction and update steps of the Kalman filter
+ 162:Core/Src/accelerometer.c ****  * to provide a more accurate and stable angle estimate.
+ 163:Core/Src/accelerometer.c ****  *
+ 164:Core/Src/accelerometer.c ****  * @param kalman Pointer to the Kalman filter structure for the axis.
+ 165:Core/Src/accelerometer.c ****  * @param acc_angle Angle measured from the accelerometer (in degrees).
+ 166:Core/Src/accelerometer.c ****  * @param gyro_rate Angular rate measured from the gyroscope (in degrees per second).
+ 167:Core/Src/accelerometer.c ****  * @param dt Time interval since the last update (in seconds).
+ 168:Core/Src/accelerometer.c ****  */
+ 169:Core/Src/accelerometer.c **** void Kalman_GetAngle(Kalman_t *kalman, float acc_angle, float gyro_rate, float dt) {
+ 589              		.loc 1 169 84 is_stmt 1 view -0
+ 590              		.cfi_startproc
+ 591              		@ args = 0, pretend = 0, frame = 0
+ 592              		@ frame_needed = 0, uses_anonymous_args = 0
+ 593              		@ link register save eliminated.
+ 170:Core/Src/accelerometer.c ****     // 1. Prediction
+ 171:Core/Src/accelerometer.c ****     kalman->rate = gyro_rate - kalman->bias;
+ 594              		.loc 1 171 5 view .LVU168
+ 595              		.loc 1 171 38 is_stmt 0 view .LVU169
+ 596 0000 D0ED014A 		vldr.32	s9, [r0, #4]
+ 597              		.loc 1 171 30 view .LVU170
+ 598 0004 70EEE40A 		vsub.f32	s1, s1, s9
+ 599              	.LVL28:
+ 600              		.loc 1 171 18 view .LVU171
+ 601 0008 C0ED020A 		vstr.32	s1, [r0, #8]
+ 172:Core/Src/accelerometer.c ****     kalman->angle += dt * kalman->rate;
+ 602              		.loc 1 172 5 is_stmt 1 view .LVU172
+ 603              		.loc 1 172 11 is_stmt 0 view .LVU173
+ 604 000c 90ED005A 		vldr.32	s10, [r0]
+ 605              		.loc 1 172 25 view .LVU174
+ 606 0010 60EE810A 		vmul.f32	s1, s1, s2
+ 607              		.loc 1 172 19 view .LVU175
+ 608 0014 35EE205A 		vadd.f32	s10, s10, s1
+ 609 0018 80ED005A 		vstr.32	s10, [r0]
+ 173:Core/Src/accelerometer.c **** 
+ 174:Core/Src/accelerometer.c ****     // state covariance update
+ 175:Core/Src/accelerometer.c ****     kalman->P[0][0] += dt * (dt*kalman->P[1][1] - kalman->P[0][1] - kalman->P[1][0] + kalman->Q_ang
+ 610              		.loc 1 175 5 is_stmt 1 view .LVU176
+ 611              		.loc 1 175 17 is_stmt 0 view .LVU177
+ 612 001c D0ED037A 		vldr.32	s15, [r0, #12]
+ 613              		.loc 1 175 45 view .LVU178
+ 614 0020 90ED066A 		vldr.32	s12, [r0, #24]
+ 615              		.loc 1 175 32 view .LVU179
+ 616 0024 26EE014A 		vmul.f32	s8, s12, s2
+ 617              		.loc 1 175 63 view .LVU180
+ 618 0028 90ED047A 		vldr.32	s14, [r0, #16]
+ 619              		.loc 1 175 49 view .LVU181
+ 620 002c 74EE475A 		vsub.f32	s11, s8, s14
+ 621              		.loc 1 175 81 view .LVU182
+ 622 0030 D0ED056A 		vldr.32	s13, [r0, #20]
+ 623              		.loc 1 175 67 view .LVU183
+ 624 0034 75EEE65A 		vsub.f32	s11, s11, s13
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 15
+
+
+ 625              		.loc 1 175 93 view .LVU184
+ 626 0038 D0ED073A 		vldr.32	s7, [r0, #28]
+ 627              		.loc 1 175 85 view .LVU185
+ 628 003c 75EEA35A 		vadd.f32	s11, s11, s7
+ 629              		.loc 1 175 27 view .LVU186
+ 630 0040 65EE815A 		vmul.f32	s11, s11, s2
+ 631              		.loc 1 175 21 view .LVU187
+ 632 0044 77EEA57A 		vadd.f32	s15, s15, s11
+ 633 0048 C0ED037A 		vstr.32	s15, [r0, #12]
+ 176:Core/Src/accelerometer.c ****     kalman->P[0][1] -= dt * kalman->P[1][1];
+ 634              		.loc 1 176 5 is_stmt 1 view .LVU188
+ 635              		.loc 1 176 21 is_stmt 0 view .LVU189
+ 636 004c 37EE447A 		vsub.f32	s14, s14, s8
+ 637 0050 80ED047A 		vstr.32	s14, [r0, #16]
+ 177:Core/Src/accelerometer.c ****     kalman->P[1][0] -= dt * kalman->P[1][1];
+ 638              		.loc 1 177 5 is_stmt 1 view .LVU190
+ 639              		.loc 1 177 21 is_stmt 0 view .LVU191
+ 640 0054 76EEC46A 		vsub.f32	s13, s13, s8
+ 641 0058 C0ED056A 		vstr.32	s13, [r0, #20]
+ 178:Core/Src/accelerometer.c ****     kalman->P[1][1] += kalman->Q_bias * dt;
+ 642              		.loc 1 178 5 is_stmt 1 view .LVU192
+ 643              		.loc 1 178 30 is_stmt 0 view .LVU193
+ 644 005c D0ED085A 		vldr.32	s11, [r0, #32]
+ 645              		.loc 1 178 39 view .LVU194
+ 646 0060 65EE815A 		vmul.f32	s11, s11, s2
+ 647              		.loc 1 178 21 view .LVU195
+ 648 0064 36EE256A 		vadd.f32	s12, s12, s11
+ 649 0068 80ED066A 		vstr.32	s12, [r0, #24]
+ 179:Core/Src/accelerometer.c **** 
+ 180:Core/Src/accelerometer.c ****     // 2. update
+ 181:Core/Src/accelerometer.c ****     float y = acc_angle - kalman->angle; // innovation
+ 650              		.loc 1 181 5 is_stmt 1 view .LVU196
+ 651              		.loc 1 181 11 is_stmt 0 view .LVU197
+ 652 006c 30EE450A 		vsub.f32	s0, s0, s10
+ 653              	.LVL29:
+ 182:Core/Src/accelerometer.c ****     float S = kalman->P[0][0] + kalman->R_measure; // incertitude innovation
+ 654              		.loc 1 182 5 is_stmt 1 view .LVU198
+ 655              		.loc 1 182 39 is_stmt 0 view .LVU199
+ 656 0070 90ED094A 		vldr.32	s8, [r0, #36]
+ 657              		.loc 1 182 11 view .LVU200
+ 658 0074 37EE844A 		vadd.f32	s8, s15, s8
+ 659              	.LVL30:
+ 183:Core/Src/accelerometer.c ****     float K0 = kalman->P[0][0] / S;
+ 660              		.loc 1 183 5 is_stmt 1 view .LVU201
+ 661              		.loc 1 183 11 is_stmt 0 view .LVU202
+ 662 0078 C7EE845A 		vdiv.f32	s11, s15, s8
+ 663              	.LVL31:
+ 184:Core/Src/accelerometer.c ****     float K1 = kalman->P[1][0] / S;
+ 664              		.loc 1 184 5 is_stmt 1 view .LVU203
+ 665              		.loc 1 184 11 is_stmt 0 view .LVU204
+ 666 007c C6EE843A 		vdiv.f32	s7, s13, s8
+ 667              	.LVL32:
+ 185:Core/Src/accelerometer.c **** 
+ 186:Core/Src/accelerometer.c ****     // state update
+ 187:Core/Src/accelerometer.c ****     kalman->angle += K0 * y;
+ 668              		.loc 1 187 5 is_stmt 1 view .LVU205
+ 669              		.loc 1 187 25 is_stmt 0 view .LVU206
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 16
+
+
+ 670 0080 20EE254A 		vmul.f32	s8, s0, s11
+ 671              	.LVL33:
+ 672              		.loc 1 187 19 view .LVU207
+ 673 0084 35EE045A 		vadd.f32	s10, s10, s8
+ 674 0088 80ED005A 		vstr.32	s10, [r0]
+ 188:Core/Src/accelerometer.c ****     kalman->bias  += K1 * y;
+ 675              		.loc 1 188 5 is_stmt 1 view .LVU208
+ 676              		.loc 1 188 25 is_stmt 0 view .LVU209
+ 677 008c 20EE230A 		vmul.f32	s0, s0, s7
+ 678              	.LVL34:
+ 679              		.loc 1 188 19 view .LVU210
+ 680 0090 74EE804A 		vadd.f32	s9, s9, s0
+ 681 0094 C0ED014A 		vstr.32	s9, [r0, #4]
+ 189:Core/Src/accelerometer.c **** 
+ 190:Core/Src/accelerometer.c ****     // state covariance update
+ 191:Core/Src/accelerometer.c ****     float P00_temp = kalman->P[0][0];
+ 682              		.loc 1 191 5 is_stmt 1 view .LVU211
+ 683              	.LVL35:
+ 192:Core/Src/accelerometer.c ****     float P01_temp = kalman->P[0][1];
+ 684              		.loc 1 192 5 view .LVU212
+ 193:Core/Src/accelerometer.c **** 
+ 194:Core/Src/accelerometer.c ****     kalman->P[0][0] -= K0 * P00_temp;
+ 685              		.loc 1 194 5 view .LVU213
+ 686              		.loc 1 194 27 is_stmt 0 view .LVU214
+ 687 0098 27EEA55A 		vmul.f32	s10, s15, s11
+ 688              		.loc 1 194 21 view .LVU215
+ 689 009c 37EEC55A 		vsub.f32	s10, s15, s10
+ 690 00a0 80ED035A 		vstr.32	s10, [r0, #12]
+ 195:Core/Src/accelerometer.c ****     kalman->P[0][1] -= K0 * P01_temp;
+ 691              		.loc 1 195 5 is_stmt 1 view .LVU216
+ 692              		.loc 1 195 27 is_stmt 0 view .LVU217
+ 693 00a4 67EE255A 		vmul.f32	s11, s14, s11
+ 694              	.LVL36:
+ 695              		.loc 1 195 21 view .LVU218
+ 696 00a8 77EE655A 		vsub.f32	s11, s14, s11
+ 697 00ac C0ED045A 		vstr.32	s11, [r0, #16]
+ 196:Core/Src/accelerometer.c ****     kalman->P[1][0] -= K1 * P00_temp;
+ 698              		.loc 1 196 5 is_stmt 1 view .LVU219
+ 699              		.loc 1 196 27 is_stmt 0 view .LVU220
+ 700 00b0 67EEA37A 		vmul.f32	s15, s15, s7
+ 701              	.LVL37:
+ 702              		.loc 1 196 21 view .LVU221
+ 703 00b4 76EEE76A 		vsub.f32	s13, s13, s15
+ 704 00b8 C0ED056A 		vstr.32	s13, [r0, #20]
+ 197:Core/Src/accelerometer.c ****     kalman->P[1][1] -= K1 * P01_temp;
+ 705              		.loc 1 197 5 is_stmt 1 view .LVU222
+ 706              		.loc 1 197 27 is_stmt 0 view .LVU223
+ 707 00bc 27EE237A 		vmul.f32	s14, s14, s7
+ 708              	.LVL38:
+ 709              		.loc 1 197 21 view .LVU224
+ 710 00c0 36EE476A 		vsub.f32	s12, s12, s14
+ 711 00c4 80ED066A 		vstr.32	s12, [r0, #24]
+ 198:Core/Src/accelerometer.c **** }
+ 712              		.loc 1 198 1 view .LVU225
+ 713 00c8 7047     		bx	lr
+ 714              		.cfi_endproc
+ 715              	.LFE137:
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 17
+
+
+ 717              		.text
+ 718              	.Letext0:
+ 719              		.file 2 "/Users/benjamincastin/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-v
+ 720              		.file 3 "/Users/benjamincastin/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-v
+ 721              		.file 4 "Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l476xx.h"
+ 722              		.file 5 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h"
+ 723              		.file 6 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_dma.h"
+ 724              		.file 7 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_i2c.h"
+ 725              		.file 8 "Core/Inc/accelerometer.h"
+ 726              		.file 9 "/Users/benjamincastin/Library/Application Support/Code/User/globalStorage/bmd.stm32-for-v
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s 			page 18
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 accelerometer.c
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:21     .text.Accelerometer_Init:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:27     .text.Accelerometer_Init:00000000 Accelerometer_Init
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:137    .text.Accelerometer_Read:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:143    .text.Accelerometer_Read:00000000 Accelerometer_Read
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:306    .text.Accelerometer_Read:0000011c $d
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:312    .text.angles_from_accel:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:318    .text.angles_from_accel:00000000 angles_from_accel
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:415    .text.angles_from_accel:00000090 $d
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:421    .text.angles_rate_from_gyro:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:427    .text.angles_rate_from_gyro:00000000 angles_rate_from_gyro
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:456    .text.Kalman_Init:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:462    .text.Kalman_Init:00000000 Kalman_Init
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:573    .text.Kalman_Init:00000074 $d
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:580    .text.Kalman_GetAngle:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//cc4StIrW.s:586    .text.Kalman_GetAngle:00000000 Kalman_GetAngle
+
+UNDEFINED SYMBOLS
+HAL_I2C_Mem_Read
+HAL_I2C_Mem_Write
+sqrtf
+atan2f
+__aeabi_f2d
+__aeabi_dmul
+__aeabi_d2f
