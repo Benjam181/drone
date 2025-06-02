@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "accelerometer.h" // Include the accelerometer header file
 #include <stdio.h> // Include standard I/O for printf
+#include "PID.h"
 
 /* USER CODE END Includes */
 
@@ -55,6 +56,9 @@ float dt = 0.01f; // Time step (10 ms)
 
 float pitch_calc, roll_calc; // Variables to hold calculated angles
 float pitch_rate_calc, roll_rate_calc; // Variables to hold calculated rates
+
+PID pid_thrust, pid_pitch, pid_roll, pid_yaw; // PID controllers for pitch and roll
+float M1, M2, M3, M4; // Motor control signals for the drone
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -91,6 +95,12 @@ int main(void)
   Accelerometer_Init(&hi2c1); // Initialize the accelerometer
   Kalman_Init(&kalman_pitch, &kalman_roll); // Initialize Kalman filters for x, y, z axes
 
+  // Initialize PID controllers for pitch and roll
+  PID_Init(&pid_pitch, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for pitch
+  PID_Init(&pid_roll, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for roll
+  PID_Init(&pid_thrust, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for thrust
+  PID_Init(&pid_yaw, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for yaw (if needed)
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -121,6 +131,38 @@ int main(void)
     Kalman_GetAngle(&kalman_pitch, pitch_calc, pitch_rate_calc, dt);
     Kalman_GetAngle(&kalman_roll, roll_calc, roll_rate_calc, dt);
 
+    // Calculate PID control for thrust, pitch, roll and yaw
+    float u_thrust = PID_Compute(&pid_thrust, accel_data.z, 0.0f);
+    float u_pitch = PID_Compute(&pid_pitch, kalman_pitch.angle, 0.0f); // Target angle is 0 for level flight
+    float u_roll = PID_Compute(&pid_roll, kalman_roll.angle, 0.0f); // Target angle is 0 for level flight
+    float u_yaw = PID_Compute(&pid_yaw, 0.0f, 0.0f); // Assuming yaw control is not implemented, set target to 0
+
+    // Here you would typically send the control signals to motors or servos
+
+    /*
+      Drone sketch (top view):
+      (yaw is CCW for positive values)
+
+          Back
+          ROLL
+           |
+      [M3]     [M4]
+         \     /
+          \   /
+           \ /
+           [X]  -------> PITCH
+           / \
+          /   \
+         /     \
+      [M1]     [M2]
+           |
+           v
+          Front
+    */
+    M1 = u_thrust - u_pitch - u_roll + u_yaw; // Motor 1 control signal CCW
+    M2 = u_thrust - u_pitch + u_roll - u_yaw; // Motor 2 control signal CW
+    M3 = u_thrust + u_pitch - u_roll + u_yaw; // Motor 3 control signal CCW
+    M4 = u_thrust + u_pitch + u_roll - u_yaw; // Motor 4 control signal CW
     HAL_Delay(dt * 1000); // Delay for the time step
     /* USER CODE END WHILE */
 

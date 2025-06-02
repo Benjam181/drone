@@ -75,6 +75,7 @@ endif
 ######################################
 # C sources
 C_SOURCES =  \
+Core/Src/PID.c \
 Core/Src/accelerometer.c \
 Core/Src/main.c \
 Core/Src/stm32l4xx_hal_msp.c \

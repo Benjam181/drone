@@ -1,0 +1,8 @@
+- Ajouter un niveau de stabilisation d’angles (PID) (voir conv chat GPT "PID et actuateurs drone")
+- Ajouter le contrôle de position (x,y,z) (voir conv chat GPT "PID et actuateurs drone")
+
+- Modéliser le drone pour tuner PID
+- Tuner PID
+- Connecter Moteur et comprendre comment ça marche
+- Connecter tout et tester
+- Faire sous forme d'interruption

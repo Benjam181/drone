@@ -18,7 +18,7 @@ typedef struct {
     float x;
     float y;
     float z;
-}GyroData;
+} GyroData;
 
 typedef struct {
     float angle;
