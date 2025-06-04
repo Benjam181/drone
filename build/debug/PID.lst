@@ -1,4 +1,4 @@
-ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 1
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 1
   48              		.loc 1 8 19 is_stmt 0 view .LVU10
   49 0010 0023     		movs	r3, #0
   50 0012 0361     		str	r3, [r0, #16]	@ float
-ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 2
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s 			page 2
 
 
    9:Core/Src/PID.c ****     pid->previous_error = 0.0f;
@@ -118,7 +118,7 @@ ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 1
   94 000c 90ED047A 		vldr.32	s14, [r0, #16]
   95              		.loc 1 21 25 view .LVU24
   96 0010 D0ED017A 		vldr.32	s15, [r0, #4]
-ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 3
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s 			page 3
 
 
   97              		.loc 1 21 30 view .LVU25
@@ -178,7 +178,7 @@ ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 1
  135              		.loc 1 37 25 view .LVU44
  136 0056 77EEA67A 		vadd.f32	s15, s15, s13
   38:Core/Src/PID.c **** }
-ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 4
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s 			page 4
 
 
  137              		.loc 1 38 1 view .LVU45
@@ -238,7 +238,7 @@ ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 1
  185              		.section	.text.PID_SetGains,"ax",%progbits
  186              		.align	1
  187              		.global	PID_SetGains
-ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 5
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s 			page 5
 
 
  188              		.syntax unified
@@ -294,51 +294,24 @@ ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 1
  233 0004 7047     		bx	lr
  234              		.cfi_endproc
  235              	.LFE4:
- 237              		.section	.text.PID_pitch,"ax",%progbits
- 238              		.align	1
- 239              		.global	PID_pitch
- 240              		.syntax unified
-ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 6
-
-
- 241              		.thumb
- 242              		.thumb_func
- 244              	PID_pitch:
- 245              	.LVL10:
- 246              	.LFB5:
-  51:Core/Src/PID.c **** 
-  52:Core/Src/PID.c **** void PID_pitch(float setpoint_pitch, float measured_pitch) {
- 247              		.loc 1 52 60 is_stmt 1 view -0
- 248              		.cfi_startproc
- 249              		@ args = 0, pretend = 0, frame = 0
- 250              		@ frame_needed = 0, uses_anonymous_args = 0
- 251              		@ link register save eliminated.
-  53:Core/Src/PID.c ****     
-  54:Core/Src/PID.c **** }
- 252              		.loc 1 54 1 view .LVU71
- 253 0000 7047     		bx	lr
- 254              		.cfi_endproc
- 255              	.LFE5:
- 257              		.text
- 258              	.Letext0:
- 259              		.file 2 "Core/Inc/PID.h"
-ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s 			page 7
+ 237              		.text
+ 238              	.Letext0:
+ 239              		.file 2 "Core/Inc/PID.h"
+ARM GAS  /var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s 			page 6
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 PID.c
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:21     .text.PID_Init:00000000 $t
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:27     .text.PID_Init:00000000 PID_Init
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:63     .text.PID_Init:0000001c $d
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:68     .text.PID_Compute:00000000 $t
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:74     .text.PID_Compute:00000000 PID_Compute
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:159    .text.PID_Reset:00000000 $t
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:165    .text.PID_Reset:00000000 PID_Reset
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:186    .text.PID_SetGains:00000000 $t
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:192    .text.PID_SetGains:00000000 PID_SetGains
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:215    .text.PID_SetTimeStep:00000000 $t
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:221    .text.PID_SetTimeStep:00000000 PID_SetTimeStep
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:238    .text.PID_pitch:00000000 $t
-/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccL3x6Mr.s:244    .text.PID_pitch:00000000 PID_pitch
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:21     .text.PID_Init:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:27     .text.PID_Init:00000000 PID_Init
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:63     .text.PID_Init:0000001c $d
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:68     .text.PID_Compute:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:74     .text.PID_Compute:00000000 PID_Compute
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:159    .text.PID_Reset:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:165    .text.PID_Reset:00000000 PID_Reset
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:186    .text.PID_SetGains:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:192    .text.PID_SetGains:00000000 PID_SetGains
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:215    .text.PID_SetTimeStep:00000000 $t
+/var/folders/jp/0qc3z4h55h9f6h172k8821nw0000gn/T//ccqu54YJ.s:221    .text.PID_SetTimeStep:00000000 PID_SetTimeStep
 
 NO UNDEFINED SYMBOLS

@@ -61,7 +61,7 @@ main-build: Drone_PID_IDE.elf secondary-outputs
 
 # Tool invocations
 Drone_PID_IDE.elf Drone_PID_IDE.map: $(OBJS) $(USER_OBJS) /Users/benjamincastin/Documents/Drone/Drone_PID_IDE/STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Drone_PID_IDE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/benjamincastin/Documents/Drone/Drone_PID_IDE/STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Drone_PID_IDE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "Drone_PID_IDE.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/benjamincastin/Documents/Drone/Drone_PID_IDE/STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Drone_PID_IDE.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

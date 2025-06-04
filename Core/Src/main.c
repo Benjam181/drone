@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "accelerometer.h" // Include the accelerometer header file
 #include <stdio.h> // Include standard I/O for printf
+#include <string.h>
 #include "PID.h"
 
 /* USER CODE END Includes */
@@ -56,9 +57,15 @@ float dt = 0.01f; // Time step (10 ms)
 
 float pitch_calc, roll_calc; // Variables to hold calculated angles
 float pitch_rate_calc, roll_rate_calc; // Variables to hold calculated rates
+float yaw_angle = 0.0f; // Variable to hold yaw angle
 
 PID pid_thrust, pid_pitch, pid_roll, pid_yaw; // PID controllers for pitch and roll
 float M1, M2, M3, M4; // Motor control signals for the drone
+float u_thrust, u_pitch, u_roll, u_yaw; // Control signals for thrust, pitch, roll and yaw
+
+// Variables to log the angles, the actuators and the thrust
+char tx_buffer[256]; // Buffer for UART transmission
+uint32_t timestamp; // Timestamp for logging
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,6 +108,8 @@ int main(void)
   PID_Init(&pid_thrust, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for thrust
   PID_Init(&pid_yaw, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for yaw (if needed)
 
+  timestamp = 0;
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -130,12 +139,13 @@ int main(void)
     // Apply Kalman filter to the angles
     Kalman_GetAngle(&kalman_pitch, pitch_calc, pitch_rate_calc, dt);
     Kalman_GetAngle(&kalman_roll, roll_calc, roll_rate_calc, dt);
+    yaw_from_gyro(gyro_data, &yaw_angle, dt); // Calculate yaw angle from gyro data
 
     // Calculate PID control for thrust, pitch, roll and yaw
-    float u_thrust = PID_Compute(&pid_thrust, accel_data.z, 0.0f);
-    float u_pitch = PID_Compute(&pid_pitch, kalman_pitch.angle, 0.0f); // Target angle is 0 for level flight
-    float u_roll = PID_Compute(&pid_roll, kalman_roll.angle, 0.0f); // Target angle is 0 for level flight
-    float u_yaw = PID_Compute(&pid_yaw, 0.0f, 0.0f); // Assuming yaw control is not implemented, set target to 0
+    u_thrust = PID_Compute(&pid_thrust, accel_data.z, 0.0f);
+    u_pitch = PID_Compute(&pid_pitch, kalman_pitch.angle, 0.0f); // Target angle is 0 for level flight
+    u_roll = PID_Compute(&pid_roll, kalman_roll.angle, 0.0f); // Target angle is 0 for level flight
+    u_yaw = PID_Compute(&pid_yaw, yaw_angle, 0.0f); // Assuming yaw control is not implemented, set target to 0
 
     // Here you would typically send the control signals to motors or servos
 
@@ -159,10 +169,14 @@ int main(void)
            v
           Front
     */
-    M1 = u_thrust - u_pitch - u_roll + u_yaw; // Motor 1 control signal CCW
-    M2 = u_thrust - u_pitch + u_roll - u_yaw; // Motor 2 control signal CW
+    M1 = u_thrust - u_pitch - u_roll - u_yaw; // Motor 1 control signal CW
+    M2 = u_thrust - u_pitch + u_roll + u_yaw; // Motor 2 control signal CCW
     M3 = u_thrust + u_pitch - u_roll + u_yaw; // Motor 3 control signal CCW
     M4 = u_thrust + u_pitch + u_roll - u_yaw; // Motor 4 control signal CW
+
+    log_data_uart(); // Log data to UART
+    timestamp++; 
+
     HAL_Delay(dt * 1000); // Delay for the time step
     /* USER CODE END WHILE */
 
@@ -353,6 +367,13 @@ int _write(int file, char *ptr, int len)
     ITM_SendChar(*ptr++);
   }
   return len;
+}
+
+void log_data_uart() {
+    sprintf(tx_buffer, "%lu,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n",
+        timestamp, M1, M2, M3, M4, u_pitch, u_roll, u_yaw, u_thrust, accel_data.x, accel_data.y, accel_data.z, gyro_data.x, gyro_data.y, gyro_data.z);
+
+    HAL_UART_Transmit(&huart2, (uint8_t*)tx_buffer, strlen(tx_buffer), HAL_MAX_DELAY);
 }
 /* USER CODE END 4 */
 

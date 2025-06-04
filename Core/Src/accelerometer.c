@@ -104,6 +104,11 @@ void angles_rate_from_gyro(GyroData gyro_data, float *pitch_rate, float *roll_ra
     *roll_rate = gyro_data.x;  // Gyro X-axis for roll rate
 }
 
+void yaw_from_gyro(GyroData gyro_data, float *yaw, float dt) {
+    // Integrate the gyroscope Z-axis data to get yaw angle
+    *yaw += gyro_data.z * dt; // Gyro Z-axis for yaw rate
+}
+
 /**
  * @brief Initializes the Kalman filter state.
  *

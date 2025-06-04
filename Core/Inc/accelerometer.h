@@ -38,6 +38,7 @@ void Accelerometer_Read(I2C_HandleTypeDef *hi2c, AccelData *data, GyroData *gyro
 
 void angles_from_accel(AccelData accel_data, float *pitch, float *roll);
 void angles_rate_from_gyro(GyroData gyro_data, float *pitch_rate, float *roll_rate);
+void yaw_from_gyro(GyroData gyro_data, float *yaw, float dt);
 
 void Kalman_Init(Kalman_t *kalman_x, Kalman_t *kalman_y);
 void Kalman_GetAngle(Kalman_t *kalman, float acc_angle, float gyro_rate, float dt);
