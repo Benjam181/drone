@@ -1,0 +1,18 @@
+# STM32CubeIDE
+Debug/
+Release/
+*.ioc.saved
+*.log
+*.bin
+*.hex
+*.elf
+*.list
+*.map
+*.launch
+.settings/
+.cproject
+.project
+
+# OS
+.DS_Store
+Thumbs.db
