@@ -3,3 +3,4 @@
 ../Core/Src/PID.c:39:6:PID_Reset	16	static
 ../Core/Src/PID.c:43:6:PID_SetGains	24	static
 ../Core/Src/PID.c:48:6:PID_SetTimeStep	16	static
+../Core/Src/PID.c:52:9:low_pass_filter	24	static

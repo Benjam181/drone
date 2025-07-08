@@ -74,6 +74,11 @@ uint32_t timestamp; // Timestamp for logging
 
 // Variables for the transmitter inputs
 int32_t roll_input, pitch_input, thrust_input, yaw_input;
+
+int32_t previous_thrust_input = 0; // Variable to hold the previous thrust input for low-pass filtering
+int32_t previous_roll_input = 0; // Variable to hold the previous roll input for low-pass filtering
+int32_t previous_pitch_input = 0; // Variable to hold the previous pitch input for low-pass filtering
+int32_t previous_yaw_input = 0; // Variable to hold the previous yaw input for low-pass filtering
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -394,9 +399,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 7;
+  htim3.Init.Prescaler = 79;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 25000;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -469,9 +474,9 @@ static void MX_TIM4_Init(void)
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 7;
+  htim4.Init.Prescaler = 79;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 65535;
+  htim4.Init.Period = 25000;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
@@ -702,11 +707,15 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
       }
       else if(htim->Instance == htim3.Instance)
       {
-        pitch_input = 1000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 1759 - 2000;
+        pitch_input = 10000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 750;
+        // pitch_input = low_pass_filter(pitch_input, previous_pitch_input, 0.1f);
+        // previous_pitch_input = pitch_input;
       }
       else if(htim->Instance == htim4.Instance)
       {
-        thrust_input = 1000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 475 - 2000;
+        thrust_input = 10000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 500;
+        // thrust_input = low_pass_filter(thrust_input, previous_thrust_input, 0.1f);
+        // previous_thrust_input = thrust_input;
       }
       else if(htim->Instance == htim5.Instance)
       {

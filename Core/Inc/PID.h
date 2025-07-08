@@ -1,6 +1,8 @@
 #ifndef PID_H
 #define PID_H
 
+#include <stdint.h>
+
 typedef struct {
     float kp; // Proportional gain
     float ki; // Integral gain
@@ -17,5 +19,7 @@ float PID_Compute(PID *pid, float setpoint, float measured_value);
 void PID_Reset(PID *pid);
 void PID_SetGains(PID *pid, float kp, float ki, float kd);
 void PID_SetTimeStep(PID *pid, float dt);
+
+int32_t low_pass_filter(int32_t input, int32_t previous_output, float alpha);
 
 #endif // PID_H

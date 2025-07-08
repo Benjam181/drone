@@ -48,3 +48,8 @@ void PID_SetGains(PID *pid, float kp, float ki, float kd) {
 void PID_SetTimeStep(PID *pid, float dt) {
     pid->dt = dt;
 }
+
+int32_t low_pass_filter(int32_t input, int32_t previous_output, float alpha) {
+    // Apply a simple low-pass filter
+    return (int32_t)(alpha * input + (1.0f - alpha) * previous_output);
+}
