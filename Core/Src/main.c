@@ -46,6 +46,7 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
+TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
@@ -79,6 +80,11 @@ int32_t previous_thrust_input = 0; // Variable to hold the previous thrust input
 int32_t previous_roll_input = 0; // Variable to hold the previous roll input for low-pass filtering
 int32_t previous_pitch_input = 0; // Variable to hold the previous pitch input for low-pass filtering
 int32_t previous_yaw_input = 0; // Variable to hold the previous yaw input for low-pass filtering
+
+uint32_t Duty;
+uint32_t Frequency;
+uint32_t ICValue;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,6 +96,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM5_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -144,15 +151,39 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_TIM5_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
 
+  TIM1->CCR1 = 1000;
+  TIM1->CCR2 = 1000;
+  TIM1->CCR3 = 1000;
+  TIM1->CCR4 = 1000;
+  HAL_Delay(1000);
+  TIM1->CCR1 = 2000;
+  TIM1->CCR2 = 2000;
+  TIM1->CCR3 = 2000;
+  TIM1->CCR4 = 2000;
+  HAL_Delay(1000);
+  TIM1->CCR1 = 1000;
+  TIM1->CCR2 = 1000;
+  TIM1->CCR3 = 1000;
+  TIM1->CCR4 = 1000;
+  HAL_Delay(1000);
+
+  TIM1->CCR1 = 1300;
+  TIM1->CCR2 = 1300;
+  TIM1->CCR3 = 1300;
+  TIM1->CCR4 = 1300;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    LD2_GPIO_Port->ODR ^= LD2_Pin; // Toggle the LED
     Accelerometer_Read(&hi2c1, &accel_data, &gyro_data); // Read accelerometer and gyro data
     
     angles_from_accel(accel_data, &pitch_calc, &roll_calc); // Calculate pitch and roll from accelerometer data
@@ -163,12 +194,10 @@ int main(void)
     yaw_from_gyro(gyro_data, &yaw_angle, dt); // Calculate yaw angle from gyro data
 
     // Calculate PID control for thrust, pitch, roll and yaw
-    u_thrust = PID_Compute(&pid_thrust, accel_data.z, 0.0f);
-    u_pitch = PID_Compute(&pid_pitch, kalman_pitch.angle, 0.0f); // Target angle is 0 for level flight
-    u_roll = PID_Compute(&pid_roll, kalman_roll.angle, 0.0f); // Target angle is 0 for level flight
-    u_yaw = PID_Compute(&pid_yaw, yaw_angle, 0.0f); // Assuming yaw control is not implemented, set target to 0
-
-    // Here you would typically send the control signals to motors or servos
+    u_thrust = PID_Compute(&pid_thrust, thrust_input, accel_data.z);
+    u_pitch = PID_Compute(&pid_pitch, pitch_input, kalman_pitch.angle); // Target angle is 0 for level flight
+    u_roll = PID_Compute(&pid_roll, roll_input, kalman_roll.angle); // Target angle is 0 for level flight
+    u_yaw = PID_Compute(&pid_yaw, yaw_input, yaw_angle); // Assuming yaw control is not implemented, set target to 0
 
     /*
       Drone sketch (top view):
@@ -195,10 +224,8 @@ int main(void)
     M3 = u_thrust + u_pitch - u_roll + u_yaw; // Motor 3 control signal CCW
     M4 = u_thrust + u_pitch + u_roll - u_yaw; // Motor 4 control signal CW
 
-    log_data_uart(); // Log data to UART
-    timestamp++; 
-
-    HAL_Delay(dt * 1000); // Delay for the time step
+    HAL_Delay(dt * 1000);  // 10ms par boucle
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -300,6 +327,98 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 79;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 19999;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.BreakFilter = 0;
+  sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+  sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+  sBreakDeadTimeConfig.Break2Filter = 0;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+  HAL_TIM_MspPostInit(&htim1);
 
 }
 
@@ -696,6 +815,23 @@ void log_data_uart() {
 
     HAL_UART_Transmit(&huart2, (uint8_t*)tx_buffer, strlen(tx_buffer), HAL_MAX_DELAY);
 }
+
+// void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+// {
+// 	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)  // If the interrupt is triggered by channel 1
+// 	{
+// 		// Read the IC value
+// 		ICValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+
+// 		if (ICValue != 0)
+// 		{
+// 			// calculate the Duty Cycle
+// 			Duty = (HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) *100)/ICValue;
+
+// 			Frequency = 80000000/ICValue;
+// 		}
+// 	}
+// }
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
