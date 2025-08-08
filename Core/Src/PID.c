@@ -1,6 +1,6 @@
 #include "PID.h"
 
-void PID_Init(PID *pid, float kp, float ki, float kd, float dt) {
+void PID_Init(PID *pid, float kp, float ki, float kd, float dt, float u_min, float u_max) {
     pid->kp = kp;
     pid->ki = ki;
     pid->kd = kd;
@@ -8,6 +8,8 @@ void PID_Init(PID *pid, float kp, float ki, float kd, float dt) {
     pid->integral = 0.0f;
     pid->previous_error = 0.0f;
     pid->anti_windup = 100.0f; // Initialize anti-windup term
+    pid->u_min = u_min; // Minimum output value
+    pid->u_max = u_max; // Maximum output value
 }
 
 float PID_Compute(PID *pid, float setpoint, float measured_value) {
@@ -34,7 +36,7 @@ float PID_Compute(PID *pid, float setpoint, float measured_value) {
     pid->previous_error = error;
 
     // Compute output
-    return proportional + pid->integral + derivative;
+    return fminf((fmaxf(proportional + pid->integral + derivative, pid->u_min)), pid->u_max);
 }
 void PID_Reset(PID *pid) {
     pid->integral = 0.0f;

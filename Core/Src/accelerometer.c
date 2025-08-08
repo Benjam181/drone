@@ -99,14 +99,10 @@ void angles_from_accel(AccelData accel_data, float *pitch, float *roll) {
  * @param pitch_rate Pointer to store the calculated pitch rate (in degrees per second).
  * @param roll_rate Pointer to store the calculated roll rate (in degrees per second).
  */
-void angles_rate_from_gyro(GyroData gyro_data, float *pitch_rate, float *roll_rate) {
+void angles_rate_from_gyro(GyroData gyro_data, float *pitch_rate, float *roll_rate, float *yaw_rate) {
     *pitch_rate = gyro_data.y; // Gyro Y-axis for pitch rate
     *roll_rate = gyro_data.x;  // Gyro X-axis for roll rate
-}
-
-void yaw_from_gyro(GyroData gyro_data, float *yaw, float dt) {
-    // Integrate the gyroscope Z-axis data to get yaw angle
-    *yaw += gyro_data.z * dt; // Gyro Z-axis for yaw rate
+    *yaw_rate = gyro_data.z;   // Gyro Z-axis for yaw rate
 }
 
 /**

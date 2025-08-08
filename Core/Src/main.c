@@ -63,7 +63,7 @@ float dt = 0.01f; // Time step (10 ms)
 
 float pitch_calc, roll_calc; // Variables to hold calculated angles
 float pitch_rate_calc, roll_rate_calc; // Variables to hold calculated rates
-float yaw_angle = 0.0f; // Variable to hold yaw angle
+float yaw_rate = 0.0f; // Variable to hold yaw angle
 
 PID pid_thrust, pid_pitch, pid_roll, pid_yaw; // PID controllers for pitch and roll
 float M1, M2, M3, M4; // Motor control signals for the drone
@@ -75,15 +75,18 @@ uint32_t timestamp; // Timestamp for logging
 
 // Variables for the transmitter inputs
 int32_t roll_input, pitch_input, thrust_input, yaw_input;
+float roll_input_deg, pitch_input_deg, thrust_input_g, yaw_input_degps;
 
 int32_t previous_thrust_input = 0; // Variable to hold the previous thrust input for low-pass filtering
 int32_t previous_roll_input = 0; // Variable to hold the previous roll input for low-pass filtering
 int32_t previous_pitch_input = 0; // Variable to hold the previous pitch input for low-pass filtering
 int32_t previous_yaw_input = 0; // Variable to hold the previous yaw input for low-pass filtering
 
-uint32_t Duty;
-uint32_t Frequency;
-uint32_t ICValue;
+// Gains (à régler)
+float Kt = 1.0f/500.0f;   // gain thrust -> delta PWM
+float Kp = 1.0f/30.0f;   // gain pitch  -> delta PWM
+float Kr = 1.0f/30.0f;   // gain roll   -> delta PWM
+float Ky = 1.0f/180.0f;   // gain yaw    -> delta PWM
 
 /* USER CODE END PV */
 
@@ -127,10 +130,10 @@ int main(void)
   Kalman_Init(&kalman_pitch, &kalman_roll); // Initialize Kalman filters for x, y, z axes
 
   // Initialize PID controllers for pitch and roll
-  PID_Init(&pid_pitch, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for pitch
-  PID_Init(&pid_roll, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for roll
-  PID_Init(&pid_thrust, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for thrust
-  PID_Init(&pid_yaw, 1.0f, 0.1f, 0.01f, dt); // Initialize PID for yaw (if needed)
+  PID_Init(&pid_pitch, 1.0f, 0.1f, 0.01f, dt, -30, 30); // Initialize PID for pitch
+  PID_Init(&pid_roll, 1.0f, 0.1f, 0.01f, dt, -30, 30); // Initialize PID for roll
+  PID_Init(&pid_thrust, 1.0f, 0.1f, 0.01f, dt, 0, 2); // Initialize PID for thrust
+  PID_Init(&pid_yaw, 1.0f, 0.1f, 0.01f, dt, -180, 180); // Initialize PID for yaw (if needed)
 
   timestamp = 0;
 
@@ -153,11 +156,14 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+
+  // Start the TIM1 PWM channels for motor control
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
 
+  // Arm the motors
   TIM1->CCR1 = 1000;
   TIM1->CCR2 = 1000;
   TIM1->CCR3 = 1000;
@@ -173,11 +179,6 @@ int main(void)
   TIM1->CCR3 = 1000;
   TIM1->CCR4 = 1000;
   HAL_Delay(1000);
-
-  TIM1->CCR1 = 1300;
-  TIM1->CCR2 = 1300;
-  TIM1->CCR3 = 1300;
-  TIM1->CCR4 = 1300;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -187,17 +188,21 @@ int main(void)
     Accelerometer_Read(&hi2c1, &accel_data, &gyro_data); // Read accelerometer and gyro data
     
     angles_from_accel(accel_data, &pitch_calc, &roll_calc); // Calculate pitch and roll from accelerometer data
-    angles_rate_from_gyro(gyro_data, &pitch_rate_calc, &roll_rate_calc); // Calculate pitch and roll rates from gyro data
+    angles_rate_from_gyro(gyro_data, &pitch_rate_calc, &roll_rate_calc, &yaw_rate); // Calculate pitch, roll and yaw rates from gyro data
     // Apply Kalman filter to the angles
     Kalman_GetAngle(&kalman_pitch, pitch_calc, pitch_rate_calc, dt);
     Kalman_GetAngle(&kalman_roll, roll_calc, roll_rate_calc, dt);
-    yaw_from_gyro(gyro_data, &yaw_angle, dt); // Calculate yaw angle from gyro data
 
     // Calculate PID control for thrust, pitch, roll and yaw
-    u_thrust = PID_Compute(&pid_thrust, thrust_input, accel_data.z);
-    u_pitch = PID_Compute(&pid_pitch, pitch_input, kalman_pitch.angle); // Target angle is 0 for level flight
-    u_roll = PID_Compute(&pid_roll, roll_input, kalman_roll.angle); // Target angle is 0 for level flight
-    u_yaw = PID_Compute(&pid_yaw, yaw_input, yaw_angle); // Assuming yaw control is not implemented, set target to 0
+    // u_thrust = PID_Compute(&pid_thrust, thrust_input_g, accel_data.z);
+    u_pitch = PID_Compute(&pid_pitch, pitch_input_deg, kalman_pitch.angle);
+    u_roll = PID_Compute(&pid_roll, roll_input_deg, kalman_roll.angle);
+    u_yaw = PID_Compute(&pid_yaw, yaw_input_degps, yaw_rate); 
+
+    u_thrust = Kt * thrust_input; // Scale thrust control signal
+    u_pitch = Kp * u_pitch; // Scale pitch control signal
+    u_roll = Kr * u_roll; // Scale roll control signal
+    u_yaw = Ky * u_yaw; // Scale yaw control signal
 
     /*
       Drone sketch (top view):
@@ -223,6 +228,45 @@ int main(void)
     M2 = u_thrust - u_pitch + u_roll + u_yaw; // Motor 2 control signal CCW
     M3 = u_thrust + u_pitch - u_roll + u_yaw; // Motor 3 control signal CCW
     M4 = u_thrust + u_pitch + u_roll - u_yaw; // Motor 4 control signal CW
+
+    M1 = 1000 + (M1/4)*1000;
+    M2 = 1000 + (M2/4)*1000;
+    M3 = 1000 + (M3/4)*1000;
+    M4 = 1000 + (M4/4)*1000;
+
+    // Trouver le dépassement max
+    float max_val = fmaxf(fmaxf(M1, M2), fmaxf(M3, M4));
+    float min_val = fminf(fminf(M1, M2), fminf(M3, M4));
+
+    // Calcul du facteur de scaling
+    float scale = 1.0f;
+    if (max_val > PWM_MAX) {
+        float s = (PWM_MAX) / (max_val);
+        if (s < scale) scale = s;
+    }
+    if (min_val < PWM_MIN) {
+        float s = (PWM_MIN) / (min_val);
+        if (s < scale) scale = s;
+    }
+
+    // Application du scaling (seulement sur les deltas)
+    if (scale < 1.0f) {
+        M1 = + (M1) * scale;
+        M2 = + (M2) * scale;
+        M3 = + (M3) * scale;
+        M4 = + (M4) * scale;
+    }
+
+    // Clamp final
+    M1 = fminf(fmaxf(M1, PWM_MIN), PWM_MAX);
+    M2 = fminf(fmaxf(M2, PWM_MIN), PWM_MAX);
+    M3 = fminf(fmaxf(M3, PWM_MIN), PWM_MAX);
+    M4 = fminf(fmaxf(M4, PWM_MIN), PWM_MAX);
+
+    TIM1->CCR1 = (uint32_t)M1; // Set PWM duty cycle for motor 1
+    TIM1->CCR2 = (uint32_t)M2; // Set PWM duty cycle for motor 2
+    TIM1->CCR3 = (uint32_t)M3; // Set PWM duty cycle for motor 3
+    TIM1->CCR4 = (uint32_t)M4; // Set PWM duty cycle for motor 4
 
     HAL_Delay(dt * 1000);  // 10ms par boucle
     
@@ -840,22 +884,25 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
       if(htim == &htim2)
       {
         roll_input = 10000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 750;
+        roll_input_deg = roll_input / 250 * MAX_ANGLE;
+
       }
       else if(htim->Instance == htim3.Instance)
       {
         pitch_input = 10000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 750;
+        pitch_input_deg = pitch_input / 250 * MAX_ANGLE;
         // pitch_input = low_pass_filter(pitch_input, previous_pitch_input, 0.1f);
         // previous_pitch_input = pitch_input;
       }
       else if(htim->Instance == htim4.Instance)
       {
         thrust_input = 10000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 500;
-        // thrust_input = low_pass_filter(thrust_input, previous_thrust_input, 0.1f);
-        // previous_thrust_input = thrust_input;
+        // thrust_input_g = ((float)thrust_input - 250) / 250 * MAX_ACCEL_G;
       }
       else if(htim->Instance == htim5.Instance)
       {
         yaw_input = 10000 * HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2) / HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1) - 750;
+        yaw_input_degps = yaw_input / 250 * MAX_YAW_RATE;
       }
      }
 }

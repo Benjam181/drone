@@ -11,9 +11,11 @@ typedef struct {
     float integral; // Integral term
     float previous_error; // Previous error for derivative calculation
     float anti_windup; // Anti-windup term to prevent integral windup
+    float u_min;
+    float u_max;
 } PID;
 
-void PID_Init(PID *pid, float kp, float ki, float kd, float dt);
+void PID_Init(PID *pid, float kp, float ki, float kd, float dt, float u_min, float u_max);
 float PID_Compute(PID *pid, float setpoint, float measured_value);
 
 void PID_Reset(PID *pid);

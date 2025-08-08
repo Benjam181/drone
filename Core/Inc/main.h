@@ -55,6 +55,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void log_data_uart();
 
 /* USER CODE END EFP */
 
@@ -83,8 +84,12 @@ void Error_Handler(void);
 #define TRHUST_INPUT_PWM_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-void log_data_uart();
+#define MAX_ACCEL_G 2 // Maximum acceleration in g-force for thrust input
+#define MAX_ANGLE 30 // Maximum angle in degrees for pitch and roll inputs
+#define MAX_YAW_RATE 180 // Maximum yaw rate in degrees per secon
 
+#define PWM_MIN 1000.0f
+#define PWM_MAX 2000.0f
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

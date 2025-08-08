@@ -2,6 +2,5 @@
 ../Core/Src/accelerometer.c:48:6:Accelerometer_Read	48	static
 ../Core/Src/accelerometer.c:86:6:angles_from_accel	40	static
 ../Core/Src/accelerometer.c:102:6:angles_rate_from_gyro	32	static
-../Core/Src/accelerometer.c:107:6:yaw_from_gyro	32	static
-../Core/Src/accelerometer.c:125:6:Kalman_Init	16	static
-../Core/Src/accelerometer.c:163:6:Kalman_GetAngle	48	static
+../Core/Src/accelerometer.c:121:6:Kalman_Init	16	static
+../Core/Src/accelerometer.c:159:6:Kalman_GetAngle	48	static
